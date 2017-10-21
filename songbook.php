@@ -29,15 +29,17 @@ class SongBook{
 
     private function drawSongChords(){
         // Initalise the positions
-        $nBotomGap = 20;
+        $chordCount = sizeof($this->song_chords);
+        $nBottomGap = 20;
+        $nLeftGap = 24;
         $nXPos = 5;
         $nYPos = $this->book_margin_y;
         if($this->song_layout == $this->LAYOUT_CHORDS_BOTTOM){
-            $this->return_json->errors .= "Got a bottom~";
-            $nYPos = $this->pdf->getPageHeight()-25;
+            $nYPos = $this->pdf->getPageHeight()-40;
+            $nXPos = ($this->pdf->getPageWidth()/2)-(($chordCount/2)*$nBottomGap);
         }
         // Go through the chords
-        for($i=0; $i < sizeof($this->song_chords); $i++){
+        for($i=0; $i < $chordCount; $i++){
             
             $chord_image_name = "./image/uke_".$this->song_chords[$i].".png";  
             if(!fileExists($chord_image_name)){
@@ -47,9 +49,9 @@ class SongBook{
             $this->pdf->Image($chord_image_name,$nXPos,$nYPos,17);
             // Increment the position    
             if($this->song_layout == $this->LAYOUT_CHORDS_LEFT)
-                $nYPos +=24;
+                $nYPos +=$nLeftGap;
             else
-                $nXPos +=$nBotomGap;
+                $nXPos +=$nBottomGap;
         }
     }
     
@@ -108,14 +110,16 @@ class SongBook{
             $this->song_font_size += intVal($pureValue);
             $this->pdf->SetFont($this->song_font_face, '', $this->song_font_size);
         }
-        else if(false !== stripos($line,"{font-display_mode:")){
-            $pureValue = substr($line,strlen("{font-offset:"));
+        else if(false !== stripos($line,"{display_mode:")){
+            $pureValue = substr($line,strlen("{display_mode:"));
             $pureValue = substr($pureValue,0,strlen($pureValue)-2);
             $this->song_layout = intVal($pureValue);
-            if($this->song_layout == $LAYOUT_CHORDS_BOTTOM)
+            if($this->song_layout == $this->LAYOUT_CHORDS_BOTTOM){
                 $this->song_x = $this->book_margin_x_BOTTOM;
-            else
-                $this->song_x = $this->book_margin_x_BOTTOM;
+            }
+            else{
+                $this->song_x = $this->book_margin_x_LEFT;
+            }
         }
         else if(false !== stripos($line,"{start_of_chorus}")){
             // Just store where we are so we know where to draw the line
@@ -125,7 +129,6 @@ class SongBook{
             // We are at the end of the chorus
              $this->pdf->line($this->song_x-3,$this->song_chorus_marker,$this->song_x-3,$this->song_y);
         }
-        
             
                 
     }
