@@ -8,6 +8,8 @@ class SongBook{
     function __construct($inputFile, $outputfile){
         
         $this->pdf = new MYPDF();
+        $this->pdfPageWidth = $this->pdf->getPageWidth();
+        $this->pdfPageHeight = $this->pdf->getPageHeight();
         
         // Setup the return json 
         $this->return_json = new stdClass();
@@ -35,8 +37,8 @@ class SongBook{
         $nXPos = 5;
         $nYPos = $this->book_margin_y;
         if($this->song_layout == $this->LAYOUT_CHORDS_BOTTOM){
-            $nYPos = $this->pdf->getPageHeight()-40;
-            $nXPos = ($this->pdf->getPageWidth()/2)-(($chordCount/2)*$nBottomGap);
+            $nYPos = $this->pdfPageHeight-40;
+            $nXPos = ($this->pdfPageWidth/2)-(($chordCount/2)*$nBottomGap);
         }
         // Go through the chords
         for($i=0; $i < $chordCount; $i++){
@@ -64,7 +66,7 @@ class SongBook{
         $this->pdf->SetFont($this->book_font_face, '', $this->book_font_size );
         // And the song number
         $this->song_count++;
-        $this->pdf->Text($this->pdf->getPageWidth()-15, 5, $this->song_count );	
+        $this->pdf->Text($this->pdfPageWidth-15, 5, $this->song_count );	
     }
     
     private function processDirective($line){
@@ -81,7 +83,7 @@ class SongBook{
         }
         else if(false !== stripos($line,"{cb}")){
             // Column break, so draw a line and reset the margin left and reset y
-            $halfPage = $this->pdf->getPageWidth()/2;
+            $halfPage = $this->pdfPageWidth/2;
             $this->pdf->line($halfPage-1,$this->book_margin_y,$halfPage-1,$this->song_y);
             $this->song_x = $halfPage + 1;
             $this->song_y = $this->book_margin_y;
@@ -258,6 +260,8 @@ class SongBook{
     
     // The pdf object
     private $pdf;
+    private $pdfPageWidth;
+    private $pdfPageHeight;
     // Arrays for chords
 	private $chord_array = Array();
 	private $all_chord_array = Array();
