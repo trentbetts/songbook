@@ -43,7 +43,7 @@ class SongBook{
             
             $chord_image_name = "./image/uke_".$this->song_chords[$i].".png";  
             if(!fileExists($chord_image_name)){
-                $this->return_json->errors .= "Missing Chord Image $chord_image_name~";
+                //$this->return_json->errors .= "Missing Chord Image $chord_image_name~";
                 $chord_image_name = "./image/uke_404.png";  
             }
             $this->pdf->Image($chord_image_name,$nXPos,$nYPos,17);
@@ -78,6 +78,13 @@ class SongBook{
         else if(false !== stripos($line,"{lb}")){
             // Add another line
             $this->song_y = $this->pdf->GetFontSize()+$this->song_y+2;		
+        }
+        else if(false !== stripos($line,"{cb}")){
+            // Column break, so draw a line and reset the margin left and reset y
+            $halfPage = $this->pdf->getPageWidth()/2;
+            $this->pdf->line($halfPage-1,$this->book_margin_y,$halfPage-1,$this->song_y);
+            $this->song_x = $halfPage + 1;
+            $this->song_y = $this->book_margin_y;
         }
         // Comments
         else if(false !== stripos($line,"{comment:")){
