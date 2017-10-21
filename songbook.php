@@ -66,7 +66,10 @@ class SongBook{
         $this->pdf->SetFont($this->book_font_face, '', $this->book_font_size );
         // And the song number
         $this->song_count++;
-        $this->pdf->Text($this->pdfPageWidth-15, 5, $this->song_count );	
+        $this->pdf->Text($this->pdfPageWidth-15, 5, $this->song_count );
+        // Add the song to the array of songs while we are here
+        $this->book_songs[sizeof($this->book_songs)] = $this->song_title . " : " . $this->song_artist;
+        $this->book_links[sizeof($this->book_links)] = $this->pdf->AddLink();		
     }
     
     private function processDirective($line){
@@ -209,7 +212,22 @@ class SongBook{
         
     }
     
+    public function insertTOC(){
+        // Goto the page where the TOC will be displayed
+        $this->pdf->setPage(1);
+        $cell_width = $this->pdfPageWidth;
+        // Go through the songs and add those songs to the TOC
+        for($i = 0; $i < sizeof($this->book_songs); $i++){
+            $this->pdf->setX($this->book_margin_x_BOTTOM);
+            $this->pdf->Cell($cell_width,0,($i+1)." : ". $this->book_songs[$i] ,0,1,'L',false,$this->book_links[$i]);
+        }
+    }
+    
     public function processBook(){
+        //
+        // Insert a page where the table of contents will be displayed
+        //
+        $this->pdf->AddPage();
         //
         // Assume that there is going to be a song and configure the new song
         //
@@ -223,6 +241,8 @@ class SongBook{
         fclose($fp);
         // End the last song 
         $this->endSong();
+        // Insert the TOC
+        $this->insertTOC();
         // Return any errors
         return $this->return_json;
     }
@@ -275,6 +295,9 @@ class SongBook{
     // Chord Image Arrays
     private $song_chords = array();
     private $book_chords = array();
+    // Array to use in the TOC
+    private $book_songs = array();
+    private $book_links = array();
     
     private $book_font_face = 'helvetica';
     private $book_font_size = 12;
