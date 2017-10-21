@@ -47,7 +47,7 @@ class SongBook{
             $this->pdf->Image($chord_image_name,$nXPos,$nYPos,17);
             // Increment the position    
             if($this->song_layout == $this->LAYOUT_CHORDS_LEFT)
-                $nYPos +=28;
+                $nYPos +=24;
             else
                 $nXPos +=$nBotomGap;
         }
@@ -117,6 +117,16 @@ class SongBook{
             else
                 $this->song_x = $this->book_margin_x_BOTTOM;
         }
+        else if(false !== stripos($line,"{start_of_chorus}")){
+            // Just store where we are so we know where to draw the line
+            $this->song_chorus_marker = $this->song_y;
+        }
+        else if(false !== stripos($line,"{end_of_chorus}")){
+            // We are at the end of the chorus
+             $this->pdf->line($this->song_x-3,$this->song_chorus_marker,$this->song_x-3,$this->song_y);
+        }
+        
+            
                 
     }
     private function processSongLine($line){
@@ -260,6 +270,8 @@ class SongBook{
     private $song_x = 0;
     private $song_y = 0;
     private $song_layout; 
+    
+    private $song_chorus_marker = 0;
     
     private $book_margin_x_LEFT = 32;
     private $book_margin_x_BOTTOM = 5;
